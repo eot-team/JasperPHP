@@ -3,7 +3,7 @@
 namespace JasperPHP;
 
 use JasperPHP;
-use \TCPDF;
+use TCPDF;
 
 /**
  * classe Instruction
@@ -15,17 +15,19 @@ use \TCPDF;
  *
  * 2015.03.11 -- criação
  * */
-class PdfProcessor {
-
+class PdfProcessor
+{
     private $jasperObj;
     private $print_expression_result;
 
-    public function __construct(\JasperPHP\Report $jasperObj) {
+    public function __construct(\JasperPHP\Report $jasperObj)
+    {
 
         $this->jasperObj = $jasperObj;
     }
 
-    public static function prepare($report) {
+    public static function prepare($report)
+    {
         JasperPHP\Instructions::$arrayPageSetting = $report->arrayPageSetting;
         if ($report->arrayPageSetting["orientation"] == "Landscape") {
             JasperPHP\Instructions::$objOutPut = new TCPDF($report->arrayPageSetting["orientation"], 'pt', array(intval($report->arrayPageSetting["pageHeight"]), intval($report->arrayPageSetting["pageWidth"])), true);
@@ -43,19 +45,23 @@ class PdfProcessor {
         JasperPHP\Instructions::$objOutPut->setPage(1, true);
         JasperPHP\Instructions::$y_axis = (int) $report->arrayPageSetting["topMargin"];
 
-        if (JasperPHP\Instructions::$fontdir == "")
+        if (JasperPHP\Instructions::$fontdir == "") {
             JasperPHP\Instructions::$fontdir = dirname(__FILE__) . "/tcpdf/fonts";
+        }
     }
 
-    public static function PageNo() {
+    public static function PageNo()
+    {
         JasperPHP\Instructions::$objOutPut->PageNo();
     }
 
-    public static function get() {
+    public static function get()
+    {
         return JasperPHP\Instructions::$objOutPut;
     }
 
-    public function PreventY_axis($arraydata) {
+    public function PreventY_axis($arraydata)
+    {
         //$pdf = \JasperPHP\Pdf;
         $preventY_axis = JasperPHP\Instructions ::$y_axis + $arraydata['y_axis'];
         $pageheight = JasperPHP\Instructions::$arrayPageSetting["pageHeight"];
@@ -79,30 +85,35 @@ class PdfProcessor {
             JasperPHP\Instructions::addInstruction(array("type" => "setPage", "value" => JasperPHP\Instructions::$currrentPage, 'resetMargins' => false));
             JasperPHP\Instructions::runInstructions();
             $pageHeader = $this->jasperObj->getChildByClassName('PageHeader');
-            if ($pageHeader)
+            if ($pageHeader) {
                 $pageHeader->generate($this->jasperObj);
+            }
             //repeat column header?
-            if ($this->jasperObj::$columnHeaderRepeat){
-				 $columnHeader = $this->jasperObj->getChildByClassName('ColumnHeader');
-				 if($columnHeader)
-					$columnHeader->generate($this->jasperObj);
+            if ($this->jasperObj::$columnHeaderRepeat) {
+                 $columnHeader = $this->jasperObj->getChildByClassName('ColumnHeader');
+                if ($columnHeader) {
+                    $columnHeader->generate($this->jasperObj);
                 }
+            }
             JasperPHP\Instructions::runInstructions();
         }
     }
 
-    public function resetY_axis($arraydata) {
+    public function resetY_axis($arraydata)
+    {
 
         JasperPHP\Instructions::$y_axis = (int) JasperPHP\Instructions::$arrayPageSetting["topMargin"];
     }
 
-    public function SetY_axis($arraydata) {
+    public function SetY_axis($arraydata)
+    {
         if ((JasperPHP\Instructions::$y_axis + $arraydata['y_axis']) <= JasperPHP\Instructions::$arrayPageSetting["pageHeight"]) {
             JasperPHP\Instructions::$y_axis = JasperPHP\Instructions::$y_axis + $arraydata['y_axis'];
         }
     }
 
-    public function ChangeCollumn($arraydata) {
+    public function ChangeCollumn($arraydata)
+    {
         $pdf = JasperPHP\Instructions;
         if (JasperPHP\Instructions::$arrayPageSetting['columnCount'] > (JasperPHP\Instructions::$arrayPageSetting["CollumnNumber"])) {
             JasperPHP\Instructions::$arrayPageSetting["leftMargin"] = JasperPHP\Instructions::$arrayPageSetting["defaultLeftMargin"] + (JasperPHP\Instructions::$arrayPageSetting["columnWidth"] * JasperPHP\Instructions::$arrayPageSetting["CollumnNumber"]);
@@ -113,19 +124,22 @@ class PdfProcessor {
         }
     }
 
-    public function AddPage($arraydata) {
+    public function AddPage($arraydata)
+    {
         $this->jasperObj->pageChanged = true;
 
         // $pdf = JasperPHP\Pdf;
         JasperPHP\Instructions::$objOutPut->AddPage();
     }
 
-    public function setPage($arraydata) {
+    public function setPage($arraydata)
+    {
         //$pdf = JasperPHP\Pdf;
         JasperPHP\Instructions::$objOutPut->setPage($arraydata["value"], $arraydata["resetMargins"]);
     }
 
-    public function SetFont($arraydata) {
+    public function SetFont($arraydata)
+    {
         $arraydata["font"] = strtolower($arraydata["font"]);
 
         $fontfile = JasperPHP\Instructions::$fontdir . '/' . $arraydata["font"] . '.php';
@@ -158,87 +172,97 @@ class PdfProcessor {
           } */
     }
 
-    public function SetCellHeightRatio($arraydata) {
+    public function SetCellHeightRatio($arraydata)
+    {
         JasperPHP\Instructions::$objOutPut->SetCellHeightRatio($arraydata["ratio"]);
     }
-    
-    public function MultiCell($arraydata) {
+
+    public function MultiCell($arraydata)
+    {
 
         //if($fielddata==true) {
         $this->checkoverflow($arraydata, $arraydata["txt"], null);
         //}
     }
 
-    public function SetXY($arraydata) {
+    public function SetXY($arraydata)
+    {
         JasperPHP\Instructions::$objOutPut->SetXY($arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis);
     }
 
-    public function Cell($arraydata) {
+    public function Cell($arraydata)
+    {
         //                print_r($arraydata);
         //              echo "<br/>";
         //JasperPHP\Pdf::$pdfOutPut->Cell($arraydata["width"], $arraydata["height"], $this->jasperObj->updatePageNo($arraydata["txt"]), $arraydata["border"], $arraydata["ln"], $arraydata["align"], $arraydata["fill"], $arraydata["link"] . "", 0, true, "T", $arraydata["valign"]);
     }
 
-    public function Rect($arraydata) {
-        if ($arraydata['mode'] == 'Transparent')
+    public function Rect($arraydata)
+    {
+        if ($arraydata['mode'] == 'Transparent') {
             $style = '';
-        else
+        } else {
             $style = 'FD';
+        }
         //      JasperPHP\Pdf::$pdfOutPut->SetLineStyle($arraydata['border']);
         JasperPHP\Instructions::$objOutPut->Rect($arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], $style, $arraydata['border'], $arraydata['fillcolor']);
     }
 
-    public function RoundedRect($arraydata) {
-        if ($arraydata['mode'] == 'Transparent')
+    public function RoundedRect($arraydata)
+    {
+        if ($arraydata['mode'] == 'Transparent') {
             $style = '';
-        else
+        } else {
             $style = 'FD';
+        }
         //
         //        JasperPHP\Pdf::$pdfOutPut->SetLineStyle($arraydata['border']);
-        JasperPHP\Instructions::$objOutPut->RoundedRect($arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], $arraydata["radius"], '1111', $style, $arraydata['border'], $arraydata['fillcolor']);
-    	//draw only border
-	if(isset($arraydata['border']['width']) && $arraydata['border']['width']>0){		
-		JasperPHP\Instructions::$objOutPut->SetLineStyle($arraydata['border']);
-		JasperPHP\Instructions::$objOutPut->RoundedRect($arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], $arraydata["radius"], '1111',$arraydata['border']);		
-		JasperPHP\Instructions::$objOutPut->SetLineStyle(array());
-	}
+        JasperPHP\Instructions::$objOutPut->RoundedRect($arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], $arraydata["radius"], '1111', $style, $arraydata['border']['width'], $arraydata['fillcolor']);
+        //draw only border
+        if (isset($arraydata['border']['width']) && $arraydata['border']['width'] > 0) {
+            JasperPHP\Instructions::$objOutPut->SetLineStyle(['width' => intval($arraydata['border']['width'])]);
+            JasperPHP\Instructions::$objOutPut->RoundedRect($arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], $arraydata["radius"], '1111', $arraydata['border']['width']);
+    //      JasperPHP\Instructions::$objOutPut->SetLineStyle(array());
+        }
     }
 
-    public function Ellipse($arraydata) {
+    public function Ellipse($arraydata)
+    {
         //JasperPHP\Pdf::$pdfOutPut->SetLineStyle($arraydata['border']);
         JasperPHP\Instructions::$objOutPut->Ellipse($arraydata["x"] + $arraydata["width"] / 2 + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis + $arraydata["height"] / 2, $arraydata["width"] / 2, $arraydata["height"] / 2, 0, 0, 360, 'FD', $arraydata['border'], $arraydata['fillcolor']);
     }
 
-    public function Image($arraydata) {
+    public function Image($arraydata)
+    {
         //echo $arraydata["path"];
         $path = $arraydata["path"];
         $imgtype = mb_substr($path, -3);
         $arraydata["link"] = $arraydata["link"] . "";
-        if ($imgtype == 'jpg')
+        if ($imgtype == 'jpg') {
             $imgtype = "JPEG";
-        elseif ($imgtype == 'png' || $imgtype == 'PNG')
+        } elseif ($imgtype == 'png' || $imgtype == 'PNG') {
             $imgtype = "PNG";
+        }
         // echo $path;
-        $imagePath = str_replace(array('"','\\','/'),array('',DIRECTORY_SEPARATOR,DIRECTORY_SEPARATOR) ,$path);
+        $imagePath = str_replace(array('"','\\','/'), array('',DIRECTORY_SEPARATOR,DIRECTORY_SEPARATOR), $path);
         //not full patch?
         if (!file_exists($imagePath)) {
-        $imagePath = getcwd().DIRECTORY_SEPARATOR.$imagePath;
+            $imagePath = getcwd() . DIRECTORY_SEPARATOR . $imagePath;
         }
         if (file_exists($imagePath)) {
-            
             //echo $imagePath;
              //exit;
-            JasperPHP\Instructions::$objOutPut->Image($imagePath, $arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], $imgtype, $arraydata["link"], '', false, 300, '', false, false, $arraydata["border"] , $arraydata["fitbox"]);
-        }elseif( mb_substr($path, 0, 4) == 'http'){
+            JasperPHP\Instructions::$objOutPut->Image($imagePath, $arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], $imgtype, $arraydata["link"], '', false, 300, '', false, false, $arraydata["border"], $arraydata["fitbox"]);
+        } elseif (mb_substr($path, 0, 4) == 'http') {
            // echo $path;
         ///exit;
-            JasperPHP\Instructions::$objOutPut->Image($path, $arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], $imgtype, $arraydata["link"], '', false, 300, '', false, false, $arraydata["border"] , $arraydata["fitbox"]);
+            JasperPHP\Instructions::$objOutPut->Image($path, $arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], $imgtype, $arraydata["link"], '', false, 300, '', false, false, $arraydata["border"], $arraydata["fitbox"]);
         } elseif (mb_substr($path, 0, 21) == "data:image/jpg;base64") {
             $imgtype = "JPEG";
             //echo $path;
             $img = str_replace('data:image/jpg;base64,', '', $path);
             $imgdata = base64_decode($img);
-            JasperPHP\Instructions::$objOutPut->Image('@' . $imgdata, $arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], '', '' , '', false, 300, '', false, false, $arraydata["border"] ,$arraydata["fitbox"]);
+            JasperPHP\Instructions::$objOutPut->Image('@' . $imgdata, $arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], '', '', '', false, 300, '', false, false, $arraydata["border"], $arraydata["fitbox"]);
         } elseif (mb_substr($path, 0, 22) == "data:image/png;base64,") {
             $imgtype = "PNG";
             // JasperPHP\Pdf::$pdfOutPut->setImageScale(PDF_IMAGE_SCALE_RATIO);
@@ -247,11 +271,12 @@ class PdfProcessor {
             $imgdata = base64_decode($img);
 
 
-            JasperPHP\Instructions::$objOutPut->Image('@' . $imgdata, $arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], '', $arraydata["link"], '', false, 300, '', false, false, 0 ,$arraydata["fitbox"]);
+            JasperPHP\Instructions::$objOutPut->Image('@' . $imgdata, $arraydata["x"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], $arraydata["y"] + JasperPHP\Instructions::$y_axis, $arraydata["width"], $arraydata["height"], '', $arraydata["link"], '', false, 300, '', false, false, 0, $arraydata["fitbox"]);
         }
     }
 
-    public function SetTextColor($arraydata) {
+    public function SetTextColor($arraydata)
+    {
 
         //if($this->jasperObj->hideheader==true && $this->jasperObj->currentband=='pageHeader')
         //    JasperPHP\Pdf::$pdfOutPut->SetTextColor(100,33,30);
@@ -259,87 +284,103 @@ class PdfProcessor {
         JasperPHP\Instructions::$objOutPut->SetTextColor($arraydata["r"], $arraydata["g"], $arraydata["b"]);
     }
 
-    public function SetDrawColor($arraydata) {
+    public function SetDrawColor($arraydata)
+    {
         JasperPHP\Instructions::$objOutPut->SetDrawColor($arraydata["r"], $arraydata["g"], $arraydata["b"]);
     }
 
-    public function SetLineWidth($arraydata) {
+    public function SetLineWidth($arraydata)
+    {
         JasperPHP\Instructions::$objOutPut->SetLineWidth($arraydata["width"]);
     }
 
-    public function breaker($arraydata) {
+    public function breaker($arraydata)
+    {
         $this->print_expression($arraydata);
         $pageFooter = $this->jasperObj->getChildByClassName('PageFooter');
         if ($this->print_expression_result == true) {
-            if ($pageFooter)
+            if ($pageFooter) {
                 $pageFooter->generate($this->jasperObj);
+            }
             JasperPHP\Instructions::addInstruction(array("type" => "resetY_axis"));
             JasperPHP\Instructions::$currrentPage++;
             JasperPHP\Instructions::addInstruction(array("type" => "AddPage"));
             JasperPHP\Instructions::addInstruction(array("type" => "setPage", "value" => JasperPHP\Instructions::$currrentPage, 'resetMargins' => false));
             $pageHeader = $this->jasperObj->getChildByClassName('PageHeader');
             //if (JasperPHP\Pdf::$print_expression_result == true) {
-            if ($pageHeader)
+            if ($pageHeader) {
                 $pageHeader->generate($this->jasperObj);
+            }
             //}
             JasperPHP\Instructions::runInstructions();
         }
     }
 
-    public function Line($arraydata) {
+    public function Line($arraydata)
+    {
         $this->print_expression($arraydata);
         if ($this->print_expression_result == true) {
            //var_dump($arraydata["style"]);
-            //echo ($arraydata["x1"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"])."||". ($arraydata["y1"] + JasperPHP\Instructions::$y_axis)."||". ($arraydata["x2"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"])."||". $arraydata["y2"] + JasperPHP\Instructions::$y_axis."||". $arraydata["style"]; 
-            
+            //echo ($arraydata["x1"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"])."||". ($arraydata["y1"] + JasperPHP\Instructions::$y_axis)."||". ($arraydata["x2"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"])."||". $arraydata["y2"] + JasperPHP\Instructions::$y_axis."||". $arraydata["style"];
+            $arraydata["style"]['width'] = intval($arraydata["style"]['width']);
             JasperPHP\Instructions::$objOutPut->Line((int)$arraydata["x1"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], (int)$arraydata["y1"] + JasperPHP\Instructions::$y_axis, (int)$arraydata["x2"] + JasperPHP\Instructions::$arrayPageSetting["leftMargin"], (int)$arraydata["y2"] + JasperPHP\Instructions::$y_axis, $arraydata["style"]);
         }
     }
 
-    public function SetFillColor($arraydata) {
+    public function SetFillColor($arraydata)
+    {
         JasperPHP\Instructions::$objOutPut->SetFillColor($arraydata["r"], $arraydata["g"], $arraydata["b"]);
     }
 
-    public function lineChart($arraydata) {
+    public function lineChart($arraydata)
+    {
 
         // $this->generateLineChart($arraydata, JasperPHP\Pdf::$y_axis);
     }
 
-    public function barChart($arraydata) {
+    public function barChart($arraydata)
+    {
 
         // $this->generateBarChart($arraydata, JasperPHP\Pdf::$y_axis, 'barChart');
     }
 
-    public function pieChart($arraydata) {
+    public function pieChart($arraydata)
+    {
 
         //$this->generatePieChart($arraydata, JasperPHP\Pdf::$y_axis);
     }
 
-    public function stackedBarChart($arraydata) {
+    public function stackedBarChart($arraydata)
+    {
 
         //$this->generateBarChart($arraydata, JasperPHP\Pdf::$y_axis, 'stackedBarChart');
     }
 
-    public function stackedAreaChart($arraydata) {
+    public function stackedAreaChart($arraydata)
+    {
 
         //$this->generateAreaChart($arraydata, JasperPHP\Pdf::$y_axis, $arraydata["type"]);
     }
 
-    public function Barcode($arraydata) {
+    public function Barcode($arraydata)
+    {
 
         $this->showBarcode($arraydata, JasperPHP\Instructions::$y_axis);
     }
 
-    public function CrossTab($arraydata) {
+    public function CrossTab($arraydata)
+    {
 
         //$this->generateCrossTab($arraydata, JasperPHP\Pdf::$y_axis);
     }
- 
-    public function Table($arraydata){
-	JasperPHP\Table::process($arraydata);		
+
+    public function Table($arraydata)
+    {
+        JasperPHP\Table::process($arraydata);
     }
-	
-    public function showBarcode($data, $y) {
+
+    public function showBarcode($data, $y)
+    {
 
         $pdf = JasperPHP\Instructions::get();
         $type = strtoupper($data['barcodetype']);
@@ -351,10 +392,11 @@ class PdfProcessor {
         $code = $data['code'];
         //$code=$this->analyse_expression($code);
         $modulewidth = $data['modulewidth'];
-        if ($textposition == "" || $textposition == "none")
+        if ($textposition == "" || $textposition == "none") {
             $withtext = false;
-        else
+        } else {
             $withtext = true;
+        }
 
         $style = array(
             'border' => false,
@@ -408,22 +450,20 @@ class PdfProcessor {
                 $pdf->write2DBarcode($code, 'PDF417', $x, $y, $width, $height, $style, 'N');
                 break;
             case "DATAMATRIX":
-
                 //$this->pdf->Cell( $width,10,$code);
                 //echo $this->left($code,3);
                 if ($this->left($code, 3) == "QR:") {
-
                     $code = $this->right($code, strlen($code) - 3);
 
                     $pdf->write2DBarcode($code, 'QRCODE', $x, $y, $width, $height, $style, 'N');
-                } else
+                } else {
                     $pdf->write2DBarcode($code, 'DATAMATRIX', $x, $y, $width, $height, $style, 'N');
+                }
                 break;
             case "QRCODE":
                 $pdf->write2DBarcode($code, 'QRCODE', $x, $y, $width, $height, $style, 'N');
                 break;
             case "CODE128":
-
                 $pdf->write1DBarcode($code, 'C128', $x, $y, $width, $height, $modulewidth, $style, 'N');
 
                 // $this->pdf->write1DBarcode($code, 'C128', $x, $y, $width, $height,"", $style, 'N');
@@ -451,7 +491,8 @@ class PdfProcessor {
         }
     }
 
-    public function checkoverflow($obj) {
+    public function checkoverflow($obj)
+    {
         /* @var \TCPDF $pdf */
         $pdf = JasperPHP\Instructions::$objOutPut;
         $JasperObj = $this->jasperObj;
@@ -466,23 +507,23 @@ class PdfProcessor {
         $x = $pdf->GetX();
         $y = $pdf->GetY();
         //default
-        $pLeft=1;
-        $pTop=0;
-        $pRight=1;
-        $pBottom=0;         
+        $pLeft = 1;
+        $pTop = 0;
+        $pRight = 1;
+        $pBottom = 0;
         //suport padding cells
-        if(isset($obj['box']) && !empty($obj['box'])){   
-            if(isset($obj['box']['leftPadding'])){
-            $pLeft=$obj['box']['leftPadding'];            
+        if (isset($obj['box']) && !empty($obj['box'])) {
+            if (isset($obj['box']['leftPadding'])) {
+                $pLeft = $obj['box']['leftPadding'];
             }
-            if(isset($obj['box']['topPadding'])){
-            $pTop=$obj['box']['topPadding'];
+            if (isset($obj['box']['topPadding'])) {
+                $pTop = $obj['box']['topPadding'];
             }
-            if(isset($obj['box']['rightPadding'])){
-            $pRight=$obj['box']['rightPadding'];            
+            if (isset($obj['box']['rightPadding'])) {
+                $pRight = $obj['box']['rightPadding'];
             }
-            if(isset($obj['box']['bottomPadding'])){
-            $pBottom = $obj['box']['bottomPadding'];            
+            if (isset($obj['box']['bottomPadding'])) {
+                $pBottom = $obj['box']['bottomPadding'];
             }
         }
         $pdf->setCellPaddings($pLeft, $pTop, $pRight, $pBottom);
@@ -542,35 +583,68 @@ class PdfProcessor {
                   }
                   } */
             } elseif ($arraydata["poverflow"] == "false" && $arraydata["soverflow"] == "false") {
-                if ($arraydata["valign"] == "C")
+                if ($arraydata["valign"] == "C") {
                     $arraydata["valign"] = "M";
-                if ($arraydata["valign"] == "")
+                }
+                if ($arraydata["valign"] == "") {
                     $arraydata["valign"] = "T";
+                }
 
                 // clip width & height
                 if (!$rotated) {
                     $pdf->Rect($clipx, $clipy, $clipw, $cliph, 'CNZ');
                 }
-                
+
                 $pattern = (array_key_exists("pattern", $arraydata)) ? $arraydata["pattern"] : '';
                 $text = $pattern != '' ? $JasperObj->formatText($txt, $pattern) : $txt;
                 $pdf->MultiCell(
-                    $w, $h, $text, $arraydata["border"], $arraydata["align"], $arraydata["fill"], 0, $x, $y, true, 0, false, true, $h, $arraydata["valign"]);
+                    $w,
+                    $h,
+                    $text,
+                    $arraydata["border"],
+                    $arraydata["align"],
+                    $arraydata["fill"],
+                    0,
+                    $x,
+                    $y,
+                    true,
+                    0,
+                    false,
+                    true,
+                    $h,
+                    $arraydata["valign"]
+                );
                 if (isset($arraydata["link"]) && !empty($arraydata["link"])) {
                     $pdf->Link($x, $y, $arraydata["width"], $arraydata["height"], $arraydata["link"]);
                 }
             } elseif ($arraydata["poverflow"] == "true" || $arraydata["soverflow"] == "true") {
-                if ($arraydata["valign"] == "C")
+                if ($arraydata["valign"] == "C") {
                     $arraydata["valign"] = "M";
-                if ($arraydata["valign"] == "")
+                }
+                if ($arraydata["valign"] == "") {
                     $arraydata["valign"] = "T";
+                }
 
                 $x = $pdf->GetX();
                 $yAfter = $pdf->GetY();
                 $maxheight = array_key_exists('maxheight', $arraydata) ? $arraydata['maxheight'] : '';
                 //if($arraydata["link"])   echo $arraydata["linktarget"].",".$arraydata["link"]."<br/><br/>";
-                $pdf->MultiCell($w, $h, $JasperObj->formatText($txt, $arraydata["pattern"]), $arraydata["border"]
-                        , $arraydata["align"], $arraydata["fill"], 1, $x, $y, true, 0, false, true, $maxheight); //,$arraydata["valign"]);
+                $pdf->MultiCell(
+                    $w,
+                    $h,
+                    $JasperObj->formatText($txt, $arraydata["pattern"]),
+                    $arraydata["border"],
+                    $arraydata["align"],
+                    $arraydata["fill"],
+                    1,
+                    $x,
+                    $y,
+                    true,
+                    0,
+                    false,
+                    true,
+                    $maxheight
+                ); //,$arraydata["valign"]);
                 if (($yAfter + $arraydata["height"]) <= JasperPHP\Instructions::$arrayPageSetting["pageHeight"]) {
                     JasperPHP\Instructions::$y_axis = $pdf->GetY() - 20;
                 }
@@ -578,11 +652,11 @@ class PdfProcessor {
                 $pdf->MultiCell($w, $h, $JasperObj->formatText($txt, $arraydata["pattern"]), $arraydata["border"], $arraydata["align"], $arraydata["fill"], 1, $x, $y, true, 0, true, true, $maxheight);
             }
             $pdf->StopTransform();
-            
         }
     }
 
-    public function print_expression($data) {
+    public function print_expression($data)
+    {
         $expression = $data["printWhenExpression"];
         $this->print_expression_result = false;
         if ($expression != "") {
@@ -591,26 +665,28 @@ class PdfProcessor {
             error_reporting(0);
             eval('if(' . $expression . '){$this->print_expression_result=true;}');
             error_reporting(5);
-        } else
+        } else {
             $this->print_expression_result = true;
+        }
     }
 
-    public function rotate($arraydata) {
+    public function rotate($arraydata)
+    {
         $pdf = JasperPHP\Instructions::$objOutPut;
         if (array_key_exists("rotation", $arraydata)) {
             $type = (string) $arraydata["rotation"];
             $angle = null;
-            if ($type == "")
+            if ($type == "") {
                 $angle = 0;
-            elseif ($type == "Left")
+            } elseif ($type == "Left") {
                 $angle = 90;
-            elseif ($type == "Right")
+            } elseif ($type == "Right") {
                 $angle = 270;
-            elseif ($type == "UpsideDown")
+            } elseif ($type == "UpsideDown") {
                 $angle = 180;
+            }
 
             return $angle;
         }
     }
-
 }
