@@ -330,7 +330,7 @@
 				<textElement>
 					<font size="6"/>
 				</textElement>
-				<text><![CDATA[Local de pagamento]]></text>
+				<text><![CDATA[Local de Pagamento]]></text>
 			</staticText>
 			<line>
 				<reportElement x="1" y="322" width="555" height="1" uuid="419a9c5b-406b-4ed5-bb06-1dc2862dc6aa">
@@ -505,7 +505,7 @@
 				<textFieldExpression><![CDATA[$F{linha_digitavel}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="5" y="100" width="271" height="12" uuid="e47bc2ec-abe1-4d28-b523-cb92d0fda1c1"/>
+				<reportElement x="5" y="100" width="450" height="12" uuid="e47bc2ec-abe1-4d28-b523-cb92d0fda1c1"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
